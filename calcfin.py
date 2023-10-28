@@ -4,7 +4,22 @@ import pandas as pd
 def tickerCollector():
     file = "https://www.moex.com/ru/listing/securities-list-csv.aspx?type=1"
     securityList = pd.read_csv(file, sep=',', encoding='cp1251')
-    print(securityList)
+    headers = securityList.columns
+    print(headers)
+    #Анализируем колонки, которые нам могут помочь. Внимание привлекли колонки TRADE_CODE и INSTRUMENT_CATEGORY
+    #Наша задача - отобрать только акции и запомнить их тикеры, что затем узнать текущие цены на инструменты
+    #на бирже
+    securityList = securityList[["INSTRUMENT_CATEGORY","TRADE_CODE"]]
+    #Мы отберем тикеры по двум фильтрам - по слову акции в категориях инструменты
+    #И по длине торгового кода - максимальная его длина составляет 6
+    securityList = securityList[
+                                (securityList["INSTRUMENT_CATEGORY"].str.contains("акции|Акции"))&
+                                (securityList["TRADE_CODE"].str.len()<=6
+                                                                           )]
+    
+    #В итоге мы в реальном времени получили данные о тикерах, которые прямо сейчас торгуются на MOEX
+    securityList = securityList["TRADE_CODE"].reset_index(drop=True)
+    return securityList
 
 
 def callApi(ticker):

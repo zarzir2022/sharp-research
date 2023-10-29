@@ -92,13 +92,13 @@ class AnalizeApi():
 
 def priceCollection(moexTickersStocks):
     prices=[]
-    for ticker in moexTickersStocks:
+    for ticker in tqdm(moexTickersStocks):
         try:
             price = AnalizeApi(ticker).get_stock_info()['LAST']
             prices.append([ticker,price])
         except Exception:
             pass
-    return prices
+    priceCollectionDF =  prices
 
 #В результате мы получили массив prices, который включает в себя тикер и актуальную в моменте цену акции
 #Для тикеров из массива спарсим размер equity с помощью разработанного нами метода get_report(), а также объём бумаг в обращении методом get_stocks_statistics.
@@ -110,7 +110,7 @@ def priceCollection(moexTickersStocks):
     
 def equityAndSharesCollection(tickersWithPrices):
     equityList=[]
-    for ticker in tickersWithPrices:
+    for ticker in tqdm(tickersWithPrices):
         try:
 <<<<<<< HEAD
             year = 2022
@@ -144,19 +144,27 @@ print(equityAndSharesCollection(["AFLT","LKOH", "OGKB"]))
 # priceCollection, equityAndSharesCollection, изменить полученный от них ответ из формата списка в тип данных DataFrame
 # и сджойнить по тикерам оба массива. В результате получим датафрейм df, с которым и будем работать.
 
-# def main():
-#     moexTickersStocks = tickerCollector().head(10) #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
-#     tickersWithPrices = pd.DataFrame(priceCollection(moexTickersStocks), columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
+def main():
+    moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
     
-#     equityList = equityAndSharesCollection(tickersWithPrices = tickersWithPrices["Ticker"]) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте
-#     equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
+    print("Собираем данные о ценах...")
+    tickersWithPrices = priceCollection(moexTickersStocks)
+    tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
+    
+    onlytickers = tickersWithPrices["Ticker"]
+    print("Собираем данные о рынке...")
+    equityList = equityAndSharesCollection(tickersWithPrices = onlytickers) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте
+    equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
 
-#     df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
-#     print(df)
-
-# if __name__ == "__main__":
-#      main()
+    df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
+    print(df)
 
 
+<<<<<<< HEAD
 print(equityAndSharesCollection(["AFLT","123", "LKOH"]))
 >>>>>>> 0ca4103 (Добавлен поиск отчётности за 2021)
+=======
+if __name__ == "__main__":
+     main()
+
+>>>>>>> 2757835 (Добавлены прогресс бары)

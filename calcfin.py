@@ -113,9 +113,12 @@ def equityAndSharesCollection(tickersWithPrices):
     for ticker in tickersWithPrices:
         try:
             equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
+<<<<<<< HEAD
             sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
 
             equityList.append([ticker,equity,sharesAmount])
+=======
+>>>>>>> 0ca4103 (Добавлен поиск отчётности за 2021)
         except Exception:
             try:
 <<<<<<< HEAD
@@ -130,6 +133,9 @@ def equityAndSharesCollection(tickersWithPrices):
 >>>>>>> 5b78b2c (Добавлен анализ отчётности)
             except Exception:
                 pass
+        else:
+            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
+            equityList.append([ticker,equity,sharesAmount])
     return equityList
 
 

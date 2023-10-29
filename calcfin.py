@@ -118,10 +118,16 @@ def equityAndSharesCollection(tickersWithPrices):
             equityList.append([ticker,equity,sharesAmount])
         except Exception:
             try:
+<<<<<<< HEAD
                 year = 2021
                 equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
                 sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
                 equityList.append([ticker, equity, sharesAmount])
+=======
+                equity = int(AnalizeApi(ticker).get_report(year = 2021)["equity"])*1000
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
+                equityList.append([ticker,equity,sharesAmount])
+>>>>>>> 5b78b2c (Добавлен анализ отчётности)
             except Exception:
                 pass
     return equityList

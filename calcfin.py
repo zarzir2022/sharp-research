@@ -112,9 +112,9 @@ def equityAndSharesCollection(tickersWithPrices):
     equityList=[]
     for ticker in tickersWithPrices:
         try:
-            year = 2022
-            equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
-            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
+            equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
+            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
+
             equityList.append([ticker,equity,sharesAmount])
         except Exception:
             try:

@@ -2,6 +2,11 @@
 import requests
 import pandas as pd
 
+#progressBar
+from time import sleep
+from tqdm import tqdm
+
+#------------------------------
 pd.set_option('display.max_rows', None)
 
 def tickerCollector():
@@ -16,7 +21,7 @@ def tickerCollector():
     #Мы отберем тикеры по двум фильтрам - по слову акции в категориях инструменты
     #И по длине торгового кода - максимальная его не превышает символов (для российсих акций)
     securityList = securityList[
-                                (securityList["INSTRUMENT_CATEGORY"].str.contains("акции|Акции"))&
+                                (securityList["INSTRUMENT_CATEGORY"].str.contains("акци|Акци"))&
                                 (securityList["TRADE_CODE"].str.len()<=6
                                                                            )]
     
@@ -100,17 +105,25 @@ def priceCollection(moexTickersStocks):
 #  В целом логика парсинга будет аналогична методу выше. В метод мы должны передать 2022 год как тот, за который мы хотим получить отчёт. 
 # В случае, если equity будет не определён, нам следует пропустить тикер и перейти к следующему. 
 # Полученный тикер нам следует умножить на 1000, так как данные нам возвращаются в тыс. руб.
+#В 2022-ом году некоторые компании скрыли свою отчётность, потому в таком случае будем брать данные за 2021 год по собственному капиталу
+#Объём акций в обращении будем брать так же за 2022 год
     
 def equityAndSharesCollection(tickersWithPrices):
     equityList=[]
     for ticker in tickersWithPrices:
         try:
-            equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
-            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
-
+            year = 2022
+            equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
+            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
             equityList.append([ticker,equity,sharesAmount])
         except Exception:
-            pass
+            try:
+                year = 2021
+                equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
+                equityList.append([ticker, equity, sharesAmount])
+            except Exception:
+                pass
     return equityList
 
 
@@ -120,7 +133,7 @@ def equityAndSharesCollection(tickersWithPrices):
 # и сджойнить по тикерам оба массива. В результате получим датафрейм df, с которым и будем работать.
 
 def main():
-    moexTickersStocks = tickerCollector().head(10) #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
+    moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
     tickersWithPrices = pd.DataFrame(priceCollection(moexTickersStocks), columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
     
     equityList = equityAndSharesCollection(tickersWithPrices = tickersWithPrices["Ticker"]) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте

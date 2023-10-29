@@ -30,7 +30,6 @@ class AnalizeApi():
         result = result[1]["marketdata"][0]
         return result
     
-    #Метод, возвращающий информацию об отчётности компании за конкретный год
     def get_report(self, year):
         url = str(f"https://financemarker.ru/api/stocks/MOEX:{self.ticker}/finance")
         period = "Y"
@@ -40,7 +39,9 @@ class AnalizeApi():
         filteredReports = dict((d['year'], d) for d in filteredReports)[year]
         return filteredReports
     
-    #Метод, возвращающий информацию о рыночной информации за конкретный год
+    #Метод, возвращающий информацию о рыночной информации за конкретный год, принимает на вход Ticker объекта и год int, 
+    # на выход отдаёт фундаментальную статистику по бумаге за указанный год. Помогает найти информацию, которую не отдаёт мосбиржа
+
     def get_stocks_statistics(self, year):
         url = str(f"https://financemarker.ru/api/stocks/MOEX:{self.ticker}/finance")
         period = 12
@@ -50,16 +51,22 @@ class AnalizeApi():
         filteredShares = dict((d['year'], d) for d in filteredShares)[year]
         return filteredShares
         
+        
 
 def priceCollection(moexTickersStocks):
-    prices=[]
+    equityList=[]
     for ticker in moexTickersStocks:
         try:
-            price = AnalizeApi(ticker).get_stock_info()['LAST']
-            prices.append([ticker,price])
+            if AnalizeApi(ticker).get_report(2022)["year"]==2022:
+                year = 2022
+            else:
+                year = 2021
+            equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
+            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
+            equityList.append([ticker,equity,sharesAmount])
         except Exception:
             pass
-    return prices
+    return equityList
 
 #В результате мы получили массив prices, который включает в себя тикер, цену акции, капитализацию бумаги и количество ценных бумаг в обращении
 #Для тикеров из массива спарсим размер equity с помощью разработанного нами метода get_report(). В целом логика парсинга будет аналогична
@@ -70,28 +77,19 @@ def equityAndSharesCollection(tickersWithPrices):
     equityList=[]
     for ticker in tickersWithPrices:
         try:
-            equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
-            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
-
+            year = 2022
+            equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
+            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
             equityList.append([ticker,equity,sharesAmount])
         except Exception:
-            pass
+            try:
+                year = 2021
+                equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
+                equityList.append([ticker, equity, sharesAmount])
+            except Exception:
+                pass
     return equityList
+        
 
-
-
-#Теперь будем получать датафрейм для анализа. Чтобы это сделать, нам нужно последовательно вызвать функции:
-#priceCollection, equityAndSharesCollection и объединить их аутпуты по тикерам
-
-def main():
-    moexTickersStocks = ["POLY","HHRU"]
-    tickersWithPrices = pd.DataFrame(priceCollection(moexTickersStocks), columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX
-    
-    equityList = equityAndSharesCollection(tickersWithPrices = tickersWithPrices["Ticker"]) #Для всех тикеров, которые нам удалось спарсить, парсим equity
-    equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount"]) #Преобразуем спаршенные equity в датафрейм
-
-    df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker")
-    print(df)
-
-if __name__ == "__main__":
-     main()
+print(equityAndSharesCollection(["AFLT","LKOH", "OGKB"]))

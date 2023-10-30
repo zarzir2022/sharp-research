@@ -128,6 +128,7 @@ def equityAndSharesCollection(tickersWithPrices):
         try:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             year = 2022
             equity = int(AnalizeApi(ticker).get_report(year)["equity"])*1000
             sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year=2022)["num"])
@@ -165,6 +166,25 @@ def equityAndSharesCollection(tickersWithPrices):
         else:
             equityList.append([ticker,equity,sharesAmount, ErrorCheck])
 >>>>>>> 3f27143 (Добавлена доп проверка кода акции)
+=======
+            print(ticker)
+            ErrorCheck = "OK"
+            try:
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear)["equity"])*1000
+            except Exception:
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000
+                ErrorCheck = "equityException_prevYearTaken"
+            try:
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear)["num"])
+            except Exception:
+                    
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear-1)["num"])
+                ErrorCheck = "sharesAmountException_prevYearTaken"
+        except Exception:
+            pass
+        else:
+            equityList.append([ticker,equity,sharesAmount, ErrorCheck])
+>>>>>>> 587566d (обновлены данные для тестирования)
     return equityList
 
 <<<<<<< HEAD
@@ -194,6 +214,7 @@ print(equityAndSharesCollection(["AFLT","LKOH", "OGKB"]))
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 print(equityAndSharesCollection(["AFLT","123", "LKOH"]))
 >>>>>>> 0ca4103 (Добавлен поиск отчётности за 2021)
 =======
@@ -205,6 +226,11 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #      main()
 
+=======
+# if __name__ == "__main__":
+#      main()
+
+>>>>>>> 587566d (обновлены данные для тестирования)
 
 # #print(equityAndSharesCollection())
 
@@ -213,5 +239,11 @@ if __name__ == "__main__":
 # # print(response)
 # print(tickerCollector())
 
+<<<<<<< HEAD
 print(equityAndSharesCollection(["SBERP"]))
 >>>>>>> 3f27143 (Добавлена доп проверка кода акции)
+=======
+df = pd.DataFrame([1,2,3])
+df = df.reset_index(drop=True)
+df.to_excel("excel.xlsx", index = False)
+>>>>>>> 587566d (обновлены данные для тестирования)

@@ -126,6 +126,7 @@ def equityAndSharesCollection(tickersWithPrices):
     for ticker in tqdm(tickersWithPrices):
         try:
 <<<<<<< HEAD
+<<<<<<< HEAD
             equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
 <<<<<<< HEAD
             sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
@@ -155,6 +156,14 @@ def equityAndSharesCollection(tickersWithPrices):
             except Exception:
                 json = AnalizeApi(ticker).get_report(year = TargerYear-1)
                 equity = int(json["equity"]) * int(json["amount"])
+=======
+            print(ticker)
+            ErrorCheck = "OK"
+            try:
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear)["equity"])*1000
+            except Exception:
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000
+>>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
                 ErrorCheck = "equityException_prevYearTaken"
             try:
                 sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear)["num"])
@@ -183,6 +192,7 @@ def analizeFunc(tickersWithPrices, equityList):
 def main():
     moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
 <<<<<<< HEAD
+<<<<<<< HEAD
     tickersWithPrices = pd.DataFrame(priceCollection(moexTickersStocks), columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
 =======
 >>>>>>> 2757835 (Добавлены прогресс бары)
@@ -190,11 +200,19 @@ def main():
     print("Собираем данные о ценах...")
     tickersWithPrices = priceCollection(moexTickersStocks)
     tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
+=======
+        
+    print("Собираем данные о ценах...")
+    tickersWithPrices = priceCollection(moexTickersStocks)
+    tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
+        
+>>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
     onlytickers = tickersWithPrices["Ticker"]
     
     print("Собираем данные о рынке...")
     equityList = equityAndSharesCollection(tickersWithPrices = onlytickers) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте
     equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount", "ExceptionType"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
+<<<<<<< HEAD
     
     print("Формируем отчёт")
     df = analizeFunc(tickersWithPrices, equityList)
@@ -202,6 +220,11 @@ def main():
     df.to_excel("ParsedData.xlsx", index = False)
 
     print("Готово, проверяйте!")
+=======
+
+    df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
+    df.to_excel("ParsedData.xlsx", index = False)
+>>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
 
 if __name__ == "__main__":
      main()

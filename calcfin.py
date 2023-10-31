@@ -160,10 +160,14 @@ def equityAndSharesCollection(tickersWithPrices):
             print(ticker)
             ErrorCheck = "OK"
             try:
-                equity = int(AnalizeApi(ticker).get_report(year = TargerYear)["equity"])*1000
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear)["equity"])*1000000
             except Exception:
+<<<<<<< HEAD
                 equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000
 >>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
+=======
+                equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000000
+>>>>>>> 06e3c43 (Скорректирован размер домножения)
                 ErrorCheck = "equityException_prevYearTaken"
             try:
                 sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear)["num"])
@@ -190,6 +194,7 @@ def analizeFunc(tickersWithPrices, equityList):
 # и сджойнить по тикерам оба массива. В результате получим датафрейм df, с которым и будем работать.
 
 def main():
+<<<<<<< HEAD
     moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -201,6 +206,9 @@ def main():
     tickersWithPrices = priceCollection(moexTickersStocks)
     tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
 =======
+=======
+    moexTickersStocks = tickerCollector().head() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
+>>>>>>> 06e3c43 (Скорректирован размер домножения)
         
     print("Собираем данные о ценах...")
     tickersWithPrices = priceCollection(moexTickersStocks)

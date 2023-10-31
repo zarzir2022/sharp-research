@@ -241,6 +241,7 @@ if __name__ == "__main__":
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 print(equityAndSharesCollection(["SBERP"]))
 >>>>>>> 3f27143 (Добавлена доп проверка кода акции)
 =======
@@ -251,3 +252,6 @@ df.to_excel("excel.xlsx", index = False)
 =======
 print(equityAndSharesCollection(["PRMB"]))
 >>>>>>> 37b7544 (Добавлен парсинг только отчетности мсфо)
+=======
+print(priceCollection(["LKOH"]))
+>>>>>>> 08f48aa (Формируется отчёт, рассчитывается BV - NPV)

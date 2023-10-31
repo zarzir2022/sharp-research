@@ -160,14 +160,20 @@ def equityAndSharesCollection(tickersWithPrices):
             print(ticker)
             ErrorCheck = "OK"
             try:
-                equity = int(AnalizeApi(ticker).get_report(year = TargerYear)["equity"])*1000000
+                json = AnalizeApi(ticker).get_report(year = TargerYear)
+                equity = int(json["equity"]) * int(json["amount"])
             except Exception:
+<<<<<<< HEAD
 <<<<<<< HEAD
                 equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000
 >>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
 =======
                 equity = int(AnalizeApi(ticker).get_report(year = TargerYear-1)["equity"])*1000000
 >>>>>>> 06e3c43 (Скорректирован размер домножения)
+=======
+                json = AnalizeApi(ticker).get_report(year = TargerYear-1)
+                equity = int(json["equity"]) * int(json["amount"])
+>>>>>>> 08f48aa (Формируется отчёт, рассчитывается BV - NPV)
                 ErrorCheck = "equityException_prevYearTaken"
             try:
                 sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear)["num"])
@@ -195,6 +201,7 @@ def analizeFunc(tickersWithPrices, equityList):
 
 def main():
 <<<<<<< HEAD
+<<<<<<< HEAD
     moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -215,24 +222,39 @@ def main():
     tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
         
 >>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
+=======
+    moexTickersStocks = tickerCollector().head(10) #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
+    
+    print("Собираем данные о ценах...")
+    tickersWithPrices = priceCollection(moexTickersStocks)
+    tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
+>>>>>>> 08f48aa (Формируется отчёт, рассчитывается BV - NPV)
     onlytickers = tickersWithPrices["Ticker"]
     
     print("Собираем данные о рынке...")
     equityList = equityAndSharesCollection(tickersWithPrices = onlytickers) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте
     equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount", "ExceptionType"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 08f48aa (Формируется отчёт, рассчитывается BV - NPV)
     
     print("Формируем отчёт")
     df = analizeFunc(tickersWithPrices, equityList)
     
+<<<<<<< HEAD
     df.to_excel("ParsedData.xlsx", index = False)
 
     print("Готово, проверяйте!")
 =======
 
     df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
+=======
+>>>>>>> 08f48aa (Формируется отчёт, рассчитывается BV - NPV)
     df.to_excel("ParsedData.xlsx", index = False)
 >>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
+
+    print("Готово, проверяйте!")
 
 if __name__ == "__main__":
      main()

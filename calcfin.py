@@ -202,6 +202,7 @@ def analizeFunc(tickersWithPrices, equityList):
 def main():
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -224,6 +225,9 @@ def main():
 >>>>>>> 188facd (Добавлена обработка исключений, формируется xlsx)
 =======
     moexTickersStocks = tickerCollector().head(10) #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
+=======
+    moexTickersStocks = tickerCollector() #Для удобства возьмём первые 10 тикеров с мосбиржи, но вообще можем хоть все, просто тогда нужно будет долго ждать
+>>>>>>> fa760d1 (Добавлено формирование отчёта и честная сумма СК)
     
     print("Собираем данные о ценах...")
     tickersWithPrices = priceCollection(moexTickersStocks)

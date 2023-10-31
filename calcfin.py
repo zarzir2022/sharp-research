@@ -6,13 +6,24 @@ import pandas as pd
 from time import sleep
 from tqdm import tqdm
 
+from dlbar import DownloadBar
+
+download_bar = DownloadBar()
+
 #------------------------------
 pd.set_option('display.max_rows', None)
 
 def tickerCollector():
     #Данные о тикерах сохраним в переменной file. Так как ссылка не меняется, то можем её захардкодить и не скачивать на компьютер эксель
-    file = "https://www.moex.com/ru/listing/securities-list-csv.aspx?type=1"
-    securityList = pd.read_csv(file, sep=',', encoding='cp1251')
+    url = "https://www.moex.com/ru/listing/securities-list-csv.aspx?type=1"
+    fileName = "securities-list-csv.aspx"
+    download_bar.download(
+        url=url,
+        dest = fileName,
+        title='Скачиваем тикеры с MOEX...'
+        )   
+    
+    securityList = pd.read_csv("securities-list-csv.aspx", sep=',', encoding='cp1251')
     #headers = securityList.columns
     #Анализируем колонки, которые нам могут помочь. Внимание привлекли колонки TRADE_CODE и INSTRUMENT_CATEGORY
     #Наша задача - отобрать только акции и запомнить их тикеры, чтобы затем узнать текущие цены на инструменты
@@ -60,7 +71,7 @@ class AnalizeApi():
     # который мы присвоили ему ранее. На выход отдаёт информацию о конкретной бумаге
     def get_stock_info(self):
         result = callApi(self.ticker)
-        result = result[1]["marketdata"][0]
+        result = result[1]["securities"][0]
         return result
     
     #Метод, возвращающий информацию об отчётности компании за конкретный год, принимает на вход Ticker объекта и год int, 
@@ -68,9 +79,10 @@ class AnalizeApi():
     def get_report(self, year):
         url = str(f"https://financemarker.ru/api/stocks/MOEX:{self.ticker}/finance")
         period = "Y"
+        reportType = "МСФО"
         response = requests.get(url=url)
         reports = response.json()["data"]["reports"]
-        filteredReports = list(filter(lambda d: d['year'] == year and d['period'] == period, reports))
+        filteredReports = list(filter(lambda d: d['year'] == year and d['period'] == period and d['type'] == reportType, reports))
         filteredReports = dict((d['year'], d) for d in filteredReports)[year]
         return filteredReports
     
@@ -82,7 +94,7 @@ class AnalizeApi():
         period = 12
         response = requests.get(url=url)
         shares = response.json()["data"]["shares"]
-        filteredShares = list(filter(lambda d: d['year'] == year and d['month'] == period, shares))
+        filteredShares = list(filter(lambda d: d['year'] == year and d['month'] == period and d["code"] == self.ticker, shares))
         filteredShares = dict((d['year'], d) for d in filteredShares)[year]
         return filteredShares
         
@@ -94,7 +106,7 @@ def priceCollection(moexTickersStocks):
     prices=[]
     for ticker in tqdm(moexTickersStocks):
         try:
-            price = AnalizeApi(ticker).get_stock_info()['LAST']
+            price = AnalizeApi(ticker).get_stock_info()['PREVPRICE']
             prices.append([ticker,price])
         except Exception:
             pass
@@ -110,8 +122,10 @@ def priceCollection(moexTickersStocks):
     
 def equityAndSharesCollection(tickersWithPrices):
     equityList=[]
+    TargerYear = 2022
     for ticker in tqdm(tickersWithPrices):
         try:
+<<<<<<< HEAD
             equity = int(AnalizeApi(ticker).get_report(year = 2022)["equity"])*1000
 <<<<<<< HEAD
             sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
@@ -131,12 +145,34 @@ def equityAndSharesCollection(tickersWithPrices):
                 sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
                 equityList.append([ticker,equity,sharesAmount])
 >>>>>>> 5b78b2c (Добавлен анализ отчётности)
+=======
+            print(ticker)
+            ErrorCheck = "OK"
+            try:
+                json = AnalizeApi(ticker).get_report(year = TargerYear)
+                equity = int(json["equity"]) * int(json["amount"])
+>>>>>>> 3f27143 (Добавлена доп проверка кода акции)
             except Exception:
-                pass
+                json = AnalizeApi(ticker).get_report(year = TargerYear-1)
+                equity = int(json["equity"]) * int(json["amount"])
+                ErrorCheck = "equityException_prevYearTaken"
+            try:
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear)["num"])
+            except Exception:
+                    
+                sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = TargerYear-1)["num"])
+                ErrorCheck = "sharesAmountException_prevYearTaken"
+        except Exception:
+            pass
         else:
-            sharesAmount = int(AnalizeApi(ticker).get_stocks_statistics(year = 2022)["num"])
-            equityList.append([ticker,equity,sharesAmount])
+            equityList.append([ticker,equity,sharesAmount, ErrorCheck])
     return equityList
+
+def analizeFunc(tickersWithPrices, equityList):
+    df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
+    df["BV"] = df["Equity"]/df["SharesAmount"]
+    df["NPV"] = df["BV"] - df["CurrentPrice"]
+    return df
 
 
 
@@ -154,15 +190,18 @@ def main():
     print("Собираем данные о ценах...")
     tickersWithPrices = priceCollection(moexTickersStocks)
     tickersWithPrices = pd.DataFrame(tickersWithPrices, columns = ["Ticker", "CurrentPrice"]) #Парсим цены этих тикеров с MOEX и преобразуем в датафрейм
-    
     onlytickers = tickersWithPrices["Ticker"]
+    
     print("Собираем данные о рынке...")
     equityList = equityAndSharesCollection(tickersWithPrices = onlytickers) #Для всех тикеров, которые нам удалось спарсить, парсим equity и объём акций в обороте
-    equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
+    equityList = pd.DataFrame(equityList, columns=["Ticker", "Equity", "SharesAmount", "ExceptionType"]) #Преобразуем спаршенные собственный капитал и объём акций в датафрейм
+    
+    print("Формируем отчёт")
+    df = analizeFunc(tickersWithPrices, equityList)
+    
+    df.to_excel("ParsedData.xlsx", index = False)
 
-    df = pd.merge(tickersWithPrices, equityList, how = "inner", on = "Ticker") #Джойним цены, собственный капитал и объём по тикеру
-    print(df)
-
+    print("Готово, проверяйте!")
 
 if __name__ == "__main__":
      main()

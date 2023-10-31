@@ -240,6 +240,7 @@ if __name__ == "__main__":
 # print(tickerCollector())
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 print(equityAndSharesCollection(["SBERP"]))
 >>>>>>> 3f27143 (Добавлена доп проверка кода акции)
 =======
@@ -247,3 +248,6 @@ df = pd.DataFrame([1,2,3])
 df = df.reset_index(drop=True)
 df.to_excel("excel.xlsx", index = False)
 >>>>>>> 587566d (обновлены данные для тестирования)
+=======
+print(equityAndSharesCollection(["PRMB"]))
+>>>>>>> 37b7544 (Добавлен парсинг только отчетности мсфо)
